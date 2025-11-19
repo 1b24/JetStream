@@ -17,6 +17,7 @@
         <!-- Styles -->
         @livewireStyles
     </head>
+
     <body class="font-sans antialiased">
         <x-banner />
 
@@ -32,14 +33,33 @@
                 </header>
             @endif
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+            <!-- Page Content + Sidebar -->
+            <div x-data="{ open: true }" class="flex min-h-screen">
+
+                <!-- Sidebar -->
+                <aside :class="open ? 'w-64' : 'w-16'" class="bg-gray-900 text-white transition-all flex flex-col">
+                    <button @click="open = !open" class="p-4">☰</button>
+
+                    <nav class="px-2 space-y-2">
+                        <a href="/dashboard" class="block hover:bg-gray-700 p-2 rounded">
+                            Dashboard
+                        </a>
+
+                        <a href="/eisenhower" class="block hover:bg-gray-700 p-2 rounded">
+                            Matriz Eisenhower
+                        </a>
+                    </nav>
+                </aside>
+
+                <!-- Conteúdo -->
+                <main class="flex-1 p-4">
+                    {{ $slot }}
+                </main>
+
+            </div>
         </div>
 
         @stack('modals')
-
         @livewireScripts
     </body>
 </html>

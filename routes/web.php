@@ -15,7 +15,14 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
 
 // ROTAS DE USUÁRIO AUTENTICADO
 Route::middleware(['auth', 'verified'])->group(function () {
+
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // AQUI ENTRA A MATRIZ DE EISENHOWER 
+    Route::get('/eisenhower', function () {
+        return view('eisenhower');
+    })->name('eisenhower');
+
 });
