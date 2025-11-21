@@ -1,27 +1,27 @@
 @php
     $quadrantes = [
         1 => [
-            'titulo'      => 'Urgente e Importante',
-            'bg'          => 'bg-red-100',
-            'titleColor'  => 'text-red-700',
+            'titulo' => 'Urgente e Importante',
+            'bg' => 'bg-red-100',
+            'titleColor' => 'text-red-700',
             'buttonColor' => 'bg-red-600',
         ],
         2 => [
-            'titulo'      => 'Não Urgente e Importante',
-            'bg'          => 'bg-yellow-100',
-            'titleColor'  => 'text-yellow-700',
+            'titulo' => 'Não Urgente e Importante',
+            'bg' => 'bg-yellow-100',
+            'titleColor' => 'text-yellow-700',
             'buttonColor' => 'bg-yellow-600',
         ],
         3 => [
-            'titulo'      => 'Urgente e Não Importante',
-            'bg'          => 'bg-blue-100',
-            'titleColor'  => 'text-blue-700',
+            'titulo' => 'Urgente e Não Importante',
+            'bg' => 'bg-blue-100',
+            'titleColor' => 'text-blue-700',
             'buttonColor' => 'bg-blue-600',
         ],
         4 => [
-            'titulo'      => 'Não Urgente e Não Importante',
-            'bg'          => 'bg-green-100',
-            'titleColor'  => 'text-green-700',
+            'titulo' => 'Não Urgente e Não Importante',
+            'bg' => 'b-green-100',
+            'titleColor' => 'text-green-700',
             'buttonColor' => 'bg-green-600',
         ],
     ];
@@ -36,38 +36,31 @@
                 {{ $qdata['titulo'] }}
             </h2>
 
-            <button
-                wire:click="novaTarefa({{ $q }})"
+            <button wire:click="novaTarefa({{ $q }})"
                 class="px-3 py-1 text-sm text-white rounded {{ $qdata['buttonColor'] }} hover:brightness-110 transition">
                 + Nova tarefa
             </button>
 
             <div id="quadrante-{{ $q }}" data-quadrante="{{ $q }}" class="mt-4 min-h-[160px] space-y-3">
+
                 @foreach($tasks->where('quadrante', $q) as $t)
-    <div
-        class="p-3 bg-white border rounded-lg shadow hover:shadow-md transition cursor-pointer"
-        data-id="{{ $t->id }}"
-        wire:click="editarTarefa({{ $t->id }})"
-    >
+                    <div class="p-3 bg-white border rounded-lg shadow hover:shadow-md transition
+                                                               @if($editando === $t->id) cursor-auto @else cursor-grab active:cursor-grabbing @endif"
+                        data-id="{{ $t->id }}" wire:dblclick="editarTarefa({{ $t->id }})">
 
-        {{-- MODO EDIÇÃO --}}
-        @if($editando === $t->id)
+                        {{-- MODO EDIÇÃO --}}
+                        @if($editando === $t->id)
 
-            <input type="text"
-                wire:model.defer="novoTitulo"
-                wire:keydown.enter="salvarTarefa({{ $t->id }})"
-                wire:keydown.escape="$set('editando', null)"
-                class="w-full border-gray-300 rounded"
-                autofocus
-            >
+                            <input type="text" wire:model.defer="novoTitulo" wire:keydown.enter="salvarTarefa({{ $t->id }})"
+                                wire:keydown.escape="$set('editando', null)" class="w-full border-gray-300 rounded" autofocus>
 
-        @else
-            {{-- MODO VISUALIZAÇÃO --}}
-            {{ $t->titulo }}
-        @endif
+                        @else
+                            {{-- MODO NORMAL --}}
+                            {{ $t->titulo }}
+                        @endif
 
-    </div>
-@endforeach
+                    </div>
+                @endforeach
 
             </div>
 
@@ -89,10 +82,15 @@
                 group: "tasks",
                 animation: 180,
                 ghostClass: "opacity-50",
+                filter: "input",
                 onEnd: evt => {
                     let id = evt.item.dataset.id;
-                    let novoQuadrante = evt.to.dataset.quadrante;
-                    Livewire.emit('moverTarefa', id, novoQuadrante);
+                    let novoQuadrante = evt.to.id.replace('quadrante-', '');
+
+                    window.Livewire.dispatch('moverTarefa', {
+                        id: id,
+                        quadrante: novoQuadrante
+                    });
                 }
             });
         });
