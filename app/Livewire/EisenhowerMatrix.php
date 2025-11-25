@@ -4,47 +4,16 @@ namespace App\Livewire;
 
 use Livewire\Component;
 use App\Models\Task;
+use App\Support\Quadrantes;
 
 class EisenhowerMatrix extends Component
 {
     public $tasks;
-
     public $editando = null;
     public $novoTitulo = '';
-
     public $confirmandoExclusaoId = null;
 
-    /** Quadrantes configurados aqui */
-    public array $quadrantes = [
-        1 => [
-            'titulo'      => 'Urgente e Importante',
-            'bg'          => 'bg-red-100',
-            'titleColor'  => 'text-red-700',
-            'buttonColor' => 'bg-red-600',
-            'editBorder'  => '#dc2626',
-        ],
-        2 => [
-            'titulo'      => 'Não Urgente e Importante',
-            'bg'          => 'bg-yellow-100',
-            'titleColor'  => 'text-yellow-700',
-            'buttonColor' => 'bg-yellow-600',
-            'editBorder'  => '#ca8a04',
-        ],
-        3 => [
-            'titulo'      => 'Urgente e Não Importante',
-            'bg'          => 'bg-blue-100',
-            'titleColor'  => 'text-blue-700',
-            'buttonColor' => 'bg-blue-600',
-            'editBorder'  => '#2563eb',
-        ],
-        4 => [
-            'titulo'      => 'Não Urgente e Não Importante',
-            'bg'          => 'bg-green-100',
-            'titleColor'  => 'text-green-700',
-            'buttonColor' => 'bg-green-600',
-            'editBorder'  => '#16a34a',
-        ],
-    ];
+    public array $quadrantes = Quadrantes::LISTA;
 
     public function mount()
     {
@@ -52,19 +21,22 @@ class EisenhowerMatrix extends Component
         $this->normalizarOrdemSePreciso();
     }
 
+    /** Usa o scope owned() e deixa o código limpo */
+    private function getTask($id)
+    {
+        return Task::owned()->find($id);
+    }
     public function carregarTarefas()
     {
-        $this->tasks = Task::where('user_id', auth()->id())
-            ->orderBy('quadrante')
-            ->orderByRaw('ordem IS NULL')
-            ->orderBy('ordem')
+        $this->tasks = Task::owned()
+            ->ordered()
             ->get();
     }
 
     private function normalizarOrdemSePreciso()
     {
         foreach ([1, 2, 3, 4] as $q) {
-            $qs = Task::where('user_id', auth()->id())
+            $qs = Task::owned()
                 ->where('quadrante', $q)
                 ->orderBy('id')
                 ->get();
@@ -79,7 +51,7 @@ class EisenhowerMatrix extends Component
 
     public function novaTarefa($quadrante)
     {
-        $maxOrdem = Task::where('user_id', auth()->id())
+        $maxOrdem = Task::owned()
             ->where('quadrante', $quadrante)
             ->max('ordem');
 
@@ -94,21 +66,20 @@ class EisenhowerMatrix extends Component
         $this->carregarTarefas();
     }
 
-    /** Chamado pelo JS: Livewire.find(componentId).call('syncDrag', id, quadrante, ids) */
+    /** Chamado pelo JS */
     public function syncDrag($id, $quadrante, $ids)
     {
         $this->editando = null;
-
         $quadrante = (int)$quadrante;
 
-        if ($task = Task::where('user_id', auth()->id())->find($id)) {
+        if ($task = $this->getTask($id)) {
             $task->update(['quadrante' => $quadrante]);
         }
 
         foreach ($ids as $index => $taskId) {
-            Task::where('user_id', auth()->id())
-                ->where('id', $taskId)
-                ->update(['ordem' => $index + 1]);
+            if ($t = $this->getTask($taskId)) {
+                $t->update(['ordem' => $index + 1]);
+            }
         }
 
         $this->carregarTarefas();
@@ -116,7 +87,7 @@ class EisenhowerMatrix extends Component
 
     public function editarTarefa($id)
     {
-        if ($task = Task::where('user_id', auth()->id())->find($id)) {
+        if ($task = $this->getTask($id)) {
             $this->editando = $id;
             $this->novoTitulo = $task->titulo;
         }
@@ -124,7 +95,7 @@ class EisenhowerMatrix extends Component
 
     public function salvarTarefa($id)
     {
-        if ($task = Task::where('user_id', auth()->id())->find($id)) {
+        if ($task = $this->getTask($id)) {
             $task->update([
                 'titulo' => trim($this->novoTitulo) ?: 'Sem título',
             ]);
@@ -137,7 +108,7 @@ class EisenhowerMatrix extends Component
 
     public function toggleConcluida($id)
     {
-        if ($task = Task::where('user_id', auth()->id())->find($id)) {
+        if ($task = $this->getTask($id)) {
             $task->update(['completed' => !$task->completed]);
         }
 
@@ -156,9 +127,9 @@ class EisenhowerMatrix extends Component
 
     public function excluirTarefa($id)
     {
-        Task::where('user_id', auth()->id())
-            ->where('id', $id)
-            ->delete();
+        if ($task = $this->getTask($id)) {
+            $task->delete();
+        }
 
         $this->confirmandoExclusaoId = null;
 
