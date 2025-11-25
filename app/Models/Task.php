@@ -17,7 +17,7 @@ class Task extends Model
     protected $casts = [
         'completed' => 'boolean',
         'quadrante' => 'integer',
-        'ordem' => 'integer',
+        'ordem'     => 'integer',
     ];
 
     public function user()

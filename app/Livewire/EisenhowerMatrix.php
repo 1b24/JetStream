@@ -14,10 +14,7 @@ class EisenhowerMatrix extends Component
 
     public $confirmandoExclusaoId = null;
 
-    /**
-     * Configuração dos quadrantes – agora dentro do componente
-     * em vez de ficar no Blade.
-     */
+    /** Quadrantes configurados aqui */
     public array $quadrantes = [
         1 => [
             'titulo'      => 'Urgente e Importante',
@@ -59,7 +56,7 @@ class EisenhowerMatrix extends Component
     {
         $this->tasks = Task::where('user_id', auth()->id())
             ->orderBy('quadrante')
-            ->orderByRaw('ordem IS NULL') // NULL por último
+            ->orderByRaw('ordem IS NULL')
             ->orderBy('ordem')
             ->get();
     }
@@ -89,7 +86,7 @@ class EisenhowerMatrix extends Component
         Task::create([
             'user_id'   => auth()->id(),
             'titulo'    => 'Nova tarefa',
-            'quadrante' => (int) $quadrante,
+            'quadrante' => (int)$quadrante,
             'completed' => false,
             'ordem'     => ($maxOrdem ?? 0) + 1,
         ]);
@@ -97,21 +94,17 @@ class EisenhowerMatrix extends Component
         $this->carregarTarefas();
     }
 
-    /**
-     * Chamado direto pelo JS:
-     * Livewire.find(componentId).call('syncDrag', id, quadrante, ids)
-     */
+    /** Chamado pelo JS: Livewire.find(componentId).call('syncDrag', id, quadrante, ids) */
     public function syncDrag($id, $quadrante, $ids)
     {
         $this->editando = null;
 
-        $quadrante = (int) $quadrante;
+        $quadrante = (int)$quadrante;
 
         if ($task = Task::where('user_id', auth()->id())->find($id)) {
             $task->update(['quadrante' => $quadrante]);
         }
 
-        // Atualiza ordem no quadrante destino
         foreach ($ids as $index => $taskId) {
             Task::where('user_id', auth()->id())
                 ->where('id', $taskId)
