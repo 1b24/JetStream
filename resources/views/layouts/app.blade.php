@@ -25,13 +25,13 @@
     <div class="min-h-screen flex bg-gray-100">
 
         {{-- Sidebar (SEPARADA) --}}
-        @include('layouts.sidebar')
+        @include('layouts.partials.sidebar')
 
         {{-- Conteúdo Principal --}}
         <div class="flex-1 flex flex-col">
 
             {{-- Navbar (SEPARADA) --}}
-            @include('layouts.navigation')
+            @include('layouts.partials.navigation')
 
             <!-- Page Heading -->
             @if (isset($header))

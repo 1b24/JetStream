@@ -1,4 +1,4 @@
-{{-- resources/views/layouts/navigation.blade.php --}}
+{{-- resources/views/layouts/partials/navigation.blade.php --}}
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
 
     <!-- Primary Navigation Menu -->

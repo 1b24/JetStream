@@ -1,4 +1,4 @@
-{{-- resources/views/layouts/sidebar.blade.php --}}
+{{-- resources/views/layouts/partials/sidebar.blade.php --}}
 <aside class="hidden md:block w-60 bg-gray-900 text-gray-200 min-h-screen shadow-lg">
 
     <div class="px-6 py-6 flex items-center gap-2 border-b border-gray-800">

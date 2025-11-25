@@ -1,16 +1,19 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Eisenhower;
 
 use Livewire\Component;
+use Livewire\Attributes\Name;
 use App\Models\Task;
 use App\Support\Quadrantes;
 
+#[Name('eisenhower-matrix')]
 class EisenhowerMatrix extends Component
 {
     public $tasks;
     public $editando = null;
     public $novoTitulo = '';
+    public $novaDescricao = '';
     public $confirmandoExclusaoId = null;
 
     public array $quadrantes = Quadrantes::LISTA;
@@ -21,11 +24,12 @@ class EisenhowerMatrix extends Component
         $this->normalizarOrdemSePreciso();
     }
 
-    /** Usa o scope owned() e deixa o código limpo */
+    /** Usa o scope owned() e deixa o codigo limpo */
     private function getTask($id)
     {
         return Task::owned()->find($id);
     }
+
     public function carregarTarefas()
     {
         $this->tasks = Task::owned()
@@ -58,7 +62,8 @@ class EisenhowerMatrix extends Component
         Task::create([
             'user_id'   => auth()->id(),
             'titulo'    => 'Nova tarefa',
-            'quadrante' => (int)$quadrante,
+            'descricao' => null,
+            'quadrante' => (int) $quadrante,
             'completed' => false,
             'ordem'     => ($maxOrdem ?? 0) + 1,
         ]);
@@ -70,7 +75,7 @@ class EisenhowerMatrix extends Component
     public function syncDrag($id, $quadrante, $ids)
     {
         $this->editando = null;
-        $quadrante = (int)$quadrante;
+        $quadrante = (int) $quadrante;
 
         if ($task = $this->getTask($id)) {
             $task->update(['quadrante' => $quadrante]);
@@ -90,20 +95,31 @@ class EisenhowerMatrix extends Component
         if ($task = $this->getTask($id)) {
             $this->editando = $id;
             $this->novoTitulo = $task->titulo;
+            $this->novaDescricao = $task->descricao ?? '';
         }
     }
 
     public function salvarTarefa($id)
     {
         if ($task = $this->getTask($id)) {
+            $titulo = trim($this->novoTitulo) ?: 'Sem titulo';
+            $descricao = trim((string) $this->novaDescricao) ?: null;
+
             $task->update([
-                'titulo' => trim($this->novoTitulo) ?: 'Sem título',
+                'titulo' => $titulo,
+                'descricao' => $descricao,
             ]);
         }
 
+        $this->cancelarEdicao();
+        $this->carregarTarefas();
+    }
+
+    public function cancelarEdicao()
+    {
         $this->editando = null;
         $this->novoTitulo = '';
-        $this->carregarTarefas();
+        $this->novaDescricao = '';
     }
 
     public function toggleConcluida($id)
@@ -139,6 +155,6 @@ class EisenhowerMatrix extends Component
 
     public function render()
     {
-        return view('livewire.eisenhower-matrix');
+        return view('livewire.eisenhower.matrix');
     }
 }
