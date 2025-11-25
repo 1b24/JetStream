@@ -1,28 +1,37 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Scripts -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        <!-- Styles -->
-        @livewireStyles
-    </head>
+    <!-- Styles -->
+    @livewireStyles
+</head>
 
-    <body class="font-sans antialiased">
-        <x-banner />
+<body class="font-sans antialiased bg-gray-100">
+    <x-banner />
 
-        <div class="min-h-screen bg-gray-100">
-            @livewire('navigation-menu')
+    <!-- LAYOUT COM SIDEBAR + NAVIGATION -->
+    <div class="min-h-screen flex bg-gray-100">
+
+        {{-- Sidebar (SEPARADA) --}}
+        @include('layouts.sidebar')
+
+        {{-- Conteúdo Principal --}}
+        <div class="flex-1 flex flex-col">
+
+            {{-- Navbar (SEPARADA) --}}
+            @include('layouts.navigation')
 
             <!-- Page Heading -->
             @if (isset($header))
@@ -33,33 +42,15 @@
                 </header>
             @endif
 
-            <!-- Page Content + Sidebar -->
-            <div x-data="{ open: true }" class="flex min-h-screen">
-
-                <!-- Sidebar -->
-                <aside :class="open ? 'w-64' : 'w-16'" class="bg-gray-900 text-white transition-all flex flex-col">
-                    <button @click="open = !open" class="p-4">☰</button>
-
-                    <nav class="px-2 space-y-2">
-                        <a href="/dashboard" class="block hover:bg-gray-700 p-2 rounded">
-                            Dashboard
-                        </a>
-
-                        <a href="/eisenhower" class="block hover:bg-gray-700 p-2 rounded">
-                            Matriz Eisenhower
-                        </a>
-                    </nav>
-                </aside>
-
-                <!-- Conteúdo -->
-                <main class="flex-1 p-4">
-                    {{ $slot }}
-                </main>
-
-            </div>
+            <!-- Page Content -->
+            <main class="flex-1 p-4">
+                {{ $slot }}
+            </main>
         </div>
 
-        @stack('modals')
-        @livewireScripts
-    </body>
+    </div>
+
+    @stack('modals')
+    @livewireScripts
+</body>
 </html>
